@@ -1,5 +1,6 @@
 package com.example.novoecommerce.ui.screens
 
+import android.database.sqlite.SQLiteConstraintException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -87,6 +89,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
 @Composable
 private fun LoginForm(onLoginSuccess: () -> Unit) {
+    val context = LocalContext.current
     var email by rememberSaveable { mutableStateOf("") }
     var senha by rememberSaveable { mutableStateOf("") }
     var erro by rememberSaveable { mutableStateOf("") }
@@ -115,11 +118,7 @@ private fun LoginForm(onLoginSuccess: () -> Unit) {
         )
 
         if (erro.isNotEmpty()) {
-            Text(
-                text = erro,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 13.sp
-            )
+            Text(text = erro, color = MaterialTheme.colorScheme.error, fontSize = 13.sp)
         }
 
         Button(
@@ -127,7 +126,8 @@ private fun LoginForm(onLoginSuccess: () -> Unit) {
                 when {
                     email.isBlank() -> erro = "Informe o e-mail."
                     senha.isBlank() -> erro = "Informe a senha."
-                    !AuthManager.login(email.trim(), senha) -> erro = "E-mail ou senha incorretos."
+                    !AuthManager.login(context, email.trim(), senha) ->
+                        erro = "E-mail ou senha incorretos."
                     else -> onLoginSuccess()
                 }
             },
@@ -145,6 +145,7 @@ private fun LoginForm(onLoginSuccess: () -> Unit) {
 
 @Composable
 private fun CadastroForm(onCadastroSuccess: () -> Unit) {
+    val context = LocalContext.current
     var nome by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var senha by rememberSaveable { mutableStateOf("") }
@@ -193,23 +194,23 @@ private fun CadastroForm(onCadastroSuccess: () -> Unit) {
         )
 
         if (erro.isNotEmpty()) {
-            Text(
-                text = erro,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 13.sp
-            )
+            Text(text = erro, color = MaterialTheme.colorScheme.error, fontSize = 13.sp)
         }
 
         Button(
             onClick = {
-                when {
-                    nome.isBlank() -> erro = "Informe o nome."
-                    email.isBlank() -> erro = "Informe o e-mail."
-                    senha.length < 6 -> erro = "A senha deve ter no mínimo 6 caracteres."
-                    senha != confirmarSenha -> erro = "As senhas não coincidem."
-                    !AuthManager.cadastrar(nome.trim(), email.trim(), senha) ->
-                        erro = "Este e-mail já está cadastrado."
-                    else -> onCadastroSuccess()
+                if (senha != confirmarSenha) {
+                    erro = "As senhas não coincidem."
+                    return@Button
+                }
+                try {
+                    AuthManager.cadastrar(context, nome.trim(), email.trim(), senha)
+                    onCadastroSuccess()
+                } catch (e: IllegalArgumentException) {
+                    // Mensagem vinda do CadastroValidator
+                    erro = e.message ?: "Dados inválidos."
+                } catch (e: SQLiteConstraintException) {
+                    erro = "Este e-mail já está cadastrado."
                 }
             },
             shape = RoundedCornerShape(50),

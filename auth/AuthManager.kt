@@ -1,21 +1,40 @@
 package com.example.novoecommerce.auth
 
+import android.content.Context
+import com.example.novoecommerce.data.dal.UsuarioDAO
+import com.example.novoecommerce.validation.CadastroValidator
+import java.security.MessageDigest
+import java.security.SecureRandom
+
 object AuthManager {
-    data class User(
-        val email: String,
-        val senha: String,
-        val nome: String = ""
-    )
 
-    private val usuarios = mutableListOf<User>()
+    private fun gerarSalt(): ByteArray =
+        ByteArray(16).also { SecureRandom().nextBytes(it) }
 
-    fun login(email: String, senha: String): Boolean {
-        return usuarios.any { it.email == email && it.senha == senha }
+    private fun hashSenha(senha: String, salt: ByteArray): ByteArray =
+        MessageDigest.getInstance("SHA-256")
+            .apply { update(salt) }
+            .digest(senha.toByteArray(Charsets.UTF_8))
+
+    /**
+     * Tenta autenticar o usuário.
+     * Retorna `true` se o par e-mail/senha for válido, `false` caso contrário.
+     */
+    fun login(context: Context, email: String, senha: String): Boolean {
+        val salvo = UsuarioDAO(context).buscarSenha(email) ?: return false
+        val hash = hashSenha(senha, salvo.salt)
+        return hash.contentEquals(salvo.hash)
     }
 
-    fun cadastrar(nome: String, email: String, senha: String): Boolean {
-        if (usuarios.any { it.email == email }) return false
-        usuarios.add(User(email, senha, nome))
-        return true
+    /**
+     * Cadastra um novo usuário após validar os dados com [CadastroValidator].
+     * Lança [IllegalArgumentException] se a validação falhar.
+     * Lança [android.database.sqlite.SQLiteConstraintException] se o e-mail já existir.
+     */
+    fun cadastrar(context: Context, nome: String, email: String, senha: String) {
+        CadastroValidator.validar(nome, email, senha)
+        val salt = gerarSalt()
+        val hash = hashSenha(senha, salt)
+        UsuarioDAO(context).cadastrar(nome, email, hash, salt)
     }
 }
