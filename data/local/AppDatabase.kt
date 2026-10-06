@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import java.io.File
 
-internal class AppDatabase(context: Context) : SQLiteOpenHelper(
+internal class AppDatabase private constructor(context: Context) : SQLiteOpenHelper(
     context.applicationContext,
     File(context.noBackupFilesDir, "aula_sqlite.db").absolutePath,
     null,
@@ -27,5 +27,15 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         // Sem migrações por enquanto — projeto escolar
+    }
+
+    companion object {
+        @Volatile
+        private var instance: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase =
+            instance ?: synchronized(this) {
+                instance ?: AppDatabase(context).also { instance = it }
+            }
     }
 }
