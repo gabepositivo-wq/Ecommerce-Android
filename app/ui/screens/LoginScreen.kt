@@ -207,7 +207,6 @@ private fun CadastroForm(onCadastroSuccess: () -> Unit) {
                     AuthManager.cadastrar(context, nome.trim(), email.trim(), senha)
                     onCadastroSuccess()
                 } catch (e: IllegalArgumentException) {
-                    // Mensagem vinda do CadastroValidator
                     erro = e.message ?: "Dados inválidos."
                 } catch (e: SQLiteConstraintException) {
                     erro = "Este e-mail já está cadastrado."

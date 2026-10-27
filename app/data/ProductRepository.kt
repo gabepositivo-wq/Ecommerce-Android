@@ -1,6 +1,5 @@
 package com.example.novoecommerce.data
 
-/** Dados fixos (em memória) apenas para o trabalho escolar. */
 object ProductRepository {
 
     val categories = listOf("Games", "Phones", "Mouse", "Keyboard", "Headset", "Monitor")

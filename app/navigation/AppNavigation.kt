@@ -39,7 +39,6 @@ fun NovoEcommerceApp(cart: CartViewModel) {
             LoginScreen(
                 onLoginSuccess = {
                     nav.navigate(Routes.HOME) {
-                        // Remove o login do backstack — botão "voltar" não retorna à tela de login
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 }

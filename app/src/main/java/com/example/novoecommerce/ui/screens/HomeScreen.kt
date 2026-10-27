@@ -73,7 +73,6 @@ fun HomeScreen(
             }
         }
 
-        // Grade de 6 colunas: categorias ocupam 2 (3 por linha), produtos ocupam 3 (2 por linha).
         LazyVerticalGrid(
             columns = GridCells.Fixed(6),
             modifier = Modifier.weight(1f).fillMaxWidth(),

@@ -26,7 +26,6 @@ internal class AppDatabase private constructor(context: Context) : SQLiteOpenHel
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        // Sem migrações por enquanto — projeto escolar
     }
 
     companion object {

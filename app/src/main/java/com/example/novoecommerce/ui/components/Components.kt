@@ -48,7 +48,6 @@ import com.example.novoecommerce.ui.theme.Gray800
 import com.example.novoecommerce.ui.theme.White
 import com.example.novoecommerce.util.toBrl
 
-/** Cabeçalho cinza com cantos arredondados embaixo (como no mockup). */
 @Composable
 fun AppHeader(
     title: String,
@@ -129,7 +128,6 @@ fun SearchField(query: String, onQueryChange: (String) -> Unit) {
     )
 }
 
-/** Card de produto: emoji no lugar da imagem, nome e preço. */
 @Composable
 fun ProductCard(product: Product, onClick: () -> Unit) {
     Column(
@@ -160,7 +158,6 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
     }
 }
 
-/** Botão pequeno arredondado (categorias, "Sort By"). */
 @Composable
 fun Pill(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
@@ -175,7 +172,6 @@ fun Pill(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     }
 }
 
-/** Painel inferior (total + botão), usado no carrinho e no pagamento. */
 @Composable
 fun BottomPanel(content: @Composable ColumnScope.() -> Unit) {
     Surface(
@@ -194,7 +190,6 @@ fun BottomPanel(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
-/** Padding de lista que respeita a barra de navegação do sistema. */
 @Composable
 fun listPadding(): PaddingValues {
     val navBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()

@@ -1,6 +1,5 @@
 package com.example.novoecommerce.data
 
-/** Produtos iniciais inseridos no banco na primeira execução. */
 object ProductRepository {
 
     val categories = listOf("Games", "Phones", "Mouse", "Keyboard", "Headset", "Monitor")

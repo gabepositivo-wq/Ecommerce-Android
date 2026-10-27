@@ -21,7 +21,6 @@ class CartViewModel : ViewModel() {
     val total: Double get() = _items.sumOf { it.product.price * it.quantity }
     val deliveryFee: Double get() = if (_items.isEmpty()) 0.0 else DELIVERY_FEE
 
-    // Dados da tela de pagamento
     var cardNumber by mutableStateOf("1234123412341234")
     var customerName by mutableStateOf("Cliente")
     var street by mutableStateOf("Rua das Piaba")
