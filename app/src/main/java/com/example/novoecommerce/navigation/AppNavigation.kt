@@ -2,6 +2,7 @@ package com.example.novoecommerce.navigation
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,35 +12,85 @@ import androidx.navigation.navArgument
 import com.example.novoecommerce.ui.screens.CartScreen
 import com.example.novoecommerce.ui.screens.CategoryScreen
 import com.example.novoecommerce.ui.screens.HomeScreen
+import com.example.novoecommerce.ui.screens.LoginScreen
 import com.example.novoecommerce.ui.screens.PaymentScreen
 import com.example.novoecommerce.ui.screens.ProductDetailScreen
+import com.example.novoecommerce.ui.screens.ProdutoCrudScreen
+import com.example.novoecommerce.ui.screens.UsuarioCrudScreen
+import com.example.novoecommerce.auth.AuthViewModel
 import com.example.novoecommerce.viewmodel.CartViewModel
+import com.example.novoecommerce.viewmodel.ProdutoViewModel
 
 object Routes {
+    const val LOGIN = "login"
     const val HOME = "home"
     const val CATEGORY = "category/{name}"
     const val PRODUCT = "product/{id}"
     const val CART = "cart"
     const val PAYMENT = "payment"
+    const val PRODUTOS = "produtos"
+    const val USUARIOS = "usuarios"
 
     fun category(name: String) = "category/$name"
     fun product(id: Int) = "product/$id"
 }
 
 @Composable
-fun NovoEcommerceApp(cart: CartViewModel) {
+fun NovoEcommerceApp(
+    cart: CartViewModel,
+    produtos: ProdutoViewModel,
+    auth: AuthViewModel
+) {
     val nav = rememberNavController()
     val context = LocalContext.current
 
-    NavHost(navController = nav, startDestination = Routes.HOME) {
+    LaunchedEffect(Unit) {
+        produtos.carregar(context)
+        if (auth.restaurarSessao(context)) {
+            nav.navigate(Routes.HOME) {
+                popUpTo(Routes.LOGIN) { inclusive = true }
+            }
+        }
+    }
+
+    NavHost(navController = nav, startDestination = Routes.LOGIN) {
+
+        composable(Routes.LOGIN) {
+            LoginScreen(
+                auth = auth,
+                onLoginSuccess = {
+                    nav.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
 
         composable(Routes.HOME) {
             HomeScreen(
                 cart = cart,
+                produtos = produtos,
+                auth = auth,
+                onManageProducts = { nav.navigate(Routes.PRODUTOS) },
+                onManageUsers = { nav.navigate(Routes.USUARIOS) },
+                onLogout = {
+                    auth.encerrarSessao(context)
+                    nav.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.HOME) { inclusive = true }
+                    }
+                },
                 onCategoryClick = { nav.navigate(Routes.category(it)) },
                 onProductClick = { nav.navigate(Routes.product(it)) },
                 onCartClick = { nav.navigate(Routes.CART) }
             )
+        }
+
+        composable(Routes.PRODUTOS) {
+            ProdutoCrudScreen(produtos = produtos, onBack = { nav.popBackStack() })
+        }
+
+        composable(Routes.USUARIOS) {
+            UsuarioCrudScreen(auth = auth, onBack = { nav.popBackStack() })
         }
 
         composable(
@@ -48,6 +99,7 @@ fun NovoEcommerceApp(cart: CartViewModel) {
         ) { entry ->
             CategoryScreen(
                 category = entry.arguments?.getString("name").orEmpty(),
+                produtos = produtos,
                 cart = cart,
                 onBack = { nav.popBackStack() },
                 onProductClick = { nav.navigate(Routes.product(it)) },
@@ -61,6 +113,7 @@ fun NovoEcommerceApp(cart: CartViewModel) {
         ) { entry ->
             ProductDetailScreen(
                 productId = entry.arguments?.getInt("id") ?: -1,
+                produtos = produtos,
                 cart = cart,
                 onBack = { nav.popBackStack() },
                 onCartClick = { nav.navigate(Routes.CART) }

@@ -28,20 +28,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.novoecommerce.data.ProductRepository
 import com.example.novoecommerce.ui.components.AppHeader
 import com.example.novoecommerce.ui.theme.Orange
 import com.example.novoecommerce.util.toBrl
 import com.example.novoecommerce.viewmodel.CartViewModel
+import com.example.novoecommerce.viewmodel.ProdutoViewModel
 
 @Composable
 fun ProductDetailScreen(
     productId: Int,
+    produtos: ProdutoViewModel,
     cart: CartViewModel,
     onBack: () -> Unit,
     onCartClick: () -> Unit
 ) {
-    val product = ProductRepository.byId(productId)
+    val product = produtos.buscar(productId)
     val context = LocalContext.current
     var expanded by rememberSaveable { mutableStateOf(false) }
 

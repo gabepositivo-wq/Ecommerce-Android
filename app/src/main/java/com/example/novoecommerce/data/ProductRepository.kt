@@ -1,6 +1,6 @@
 package com.example.novoecommerce.data
 
-/** Dados fixos (em memória) apenas para o trabalho escolar. */
+/** Produtos iniciais inseridos no banco na primeira execução. */
 object ProductRepository {
 
     val categories = listOf("Games", "Phones", "Mouse", "Keyboard", "Headset", "Monitor")

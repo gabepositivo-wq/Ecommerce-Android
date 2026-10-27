@@ -1,4 +1,4 @@
-spackage com.example.novoecommerce
+package com.example.novoecommerce
 
 import android.graphics.Color
 import android.os.Bundle
@@ -11,13 +11,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.novoecommerce.auth.AuthViewModel
 import com.example.novoecommerce.navigation.NovoEcommerceApp
 import com.example.novoecommerce.ui.theme.NovoEcommerceTheme
 import com.example.novoecommerce.viewmodel.CartViewModel
+import com.example.novoecommerce.viewmodel.ProdutoViewModel
 
 class MainActivity : ComponentActivity() {
 
     private val cartViewModel: CartViewModel by viewModels()
+    private val produtoViewModel: ProdutoViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NovoEcommerceApp(cartViewModel)
+                    NovoEcommerceApp(cartViewModel, produtoViewModel, authViewModel)
                 }
             }
         }

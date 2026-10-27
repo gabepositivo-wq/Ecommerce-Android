@@ -23,12 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.novoecommerce.data.ProductRepository
 import com.example.novoecommerce.ui.components.AppHeader
 import com.example.novoecommerce.ui.components.Pill
 import com.example.novoecommerce.ui.components.ProductCard
 import com.example.novoecommerce.ui.components.listPadding
 import com.example.novoecommerce.viewmodel.CartViewModel
+import com.example.novoecommerce.viewmodel.ProdutoViewModel
 
 private enum class SortOption(val label: String) {
     NAME("Nome (A-Z)"),
@@ -39,6 +39,7 @@ private enum class SortOption(val label: String) {
 @Composable
 fun CategoryScreen(
     category: String,
+    produtos: ProdutoViewModel,
     cart: CartViewModel,
     onBack: () -> Unit,
     onProductClick: (Int) -> Unit,
@@ -48,7 +49,7 @@ fun CategoryScreen(
     var sort by rememberSaveable { mutableStateOf(SortOption.NAME) }
     var menuOpen by rememberSaveable { mutableStateOf(false) }
 
-    val filtered = ProductRepository.byCategory(category)
+    val filtered = produtos.porCategoria(category)
         .filter { it.name.contains(query, ignoreCase = true) }
     val products = when (sort) {
         SortOption.NAME -> filtered.sortedBy { it.name }
@@ -92,7 +93,7 @@ fun CategoryScreen(
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.weight(1f).fillMaxWidth(),
             contentPadding = listPadding(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
