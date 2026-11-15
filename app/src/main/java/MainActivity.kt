@@ -15,6 +15,8 @@ import com.example.novoecommerce.auth.AuthViewModel
 import com.example.novoecommerce.navigation.NovoEcommerceApp
 import com.example.novoecommerce.ui.theme.NovoEcommerceTheme
 import com.example.novoecommerce.viewmodel.CartViewModel
+import com.example.novoecommerce.viewmodel.CategoriaViewModel
+import com.example.novoecommerce.viewmodel.EnderecoViewModel
 import com.example.novoecommerce.viewmodel.ProdutoViewModel
 
 class MainActivity : ComponentActivity() {
@@ -22,6 +24,8 @@ class MainActivity : ComponentActivity() {
     private val cartViewModel: CartViewModel by viewModels()
     private val produtoViewModel: ProdutoViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
+    private val categoriaViewModel: CategoriaViewModel by viewModels()
+    private val enderecoViewModel: EnderecoViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +39,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NovoEcommerceApp(cartViewModel, produtoViewModel, authViewModel)
+                    NovoEcommerceApp(
+                        cart = cartViewModel,
+                        produtos = produtoViewModel,
+                        auth = authViewModel,
+                        categorias = categoriaViewModel,
+                        enderecos = enderecoViewModel
+                    )
                 }
             }
         }

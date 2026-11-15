@@ -10,8 +10,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,6 +39,8 @@ fun HomeScreen(
     auth: AuthViewModel,
     onManageProducts: () -> Unit,
     onManageUsers: () -> Unit,
+    onManageCategories: () -> Unit,
+    onManageAddresses: () -> Unit,
     onLogout: () -> Unit,
     onCategoryClick: (String) -> Unit,
     onProductClick: (Int) -> Unit,
@@ -46,62 +49,91 @@ fun HomeScreen(
     var query by rememberSaveable { mutableStateOf("") }
     val products = produtos.produtos.filter { it.name.contains(query, ignoreCase = true) }
 
-    Column(Modifier.fillMaxSize()) {
-        AppHeader(
-            title = "Home",
-            onCartClick = onCartClick,
-            cartCount = cart.itemCount,
-            query = query,
-            onQueryChange = { query = it }
-        )
-        Column(
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text("Olá, ${auth.usuarioAtual?.nome.orEmpty()}")
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(onClick = onManageProducts, modifier = Modifier.weight(1f)) {
-                    Text("Produtos")
-                }
-                Button(onClick = onManageUsers, modifier = Modifier.weight(1f)) {
-                    Text("Usuários")
-                }
-                TextButton(onClick = onLogout) { Text("Sair") }
-            }
+    Scaffold(
+        topBar = {
+            AppHeader(
+                title = "Home",
+                onCartClick = onCartClick,
+                cartCount = cart.itemCount,
+                query = query,
+                onQueryChange = { query = it }
+            )
         }
-
-        // Grade de 6 colunas: categorias ocupam 2 (3 por linha), produtos ocupam 3 (2 por linha).
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(6),
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = listPadding(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    text = "Categorias",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Olá, ${auth.usuarioAtual?.nome.orEmpty()}")
+                    TextButton(onClick = onLogout) { Text("Sair") }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(onClick = onManageProducts, modifier = Modifier.weight(1f)) {
+                        Text("Produtos")
+                    }
+                    Button(onClick = onManageUsers, modifier = Modifier.weight(1f)) {
+                        Text("Usuários")
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(onClick = onManageCategories, modifier = Modifier.weight(1f)) {
+                        Text("Categorias")
+                    }
+                    Button(onClick = onManageAddresses, modifier = Modifier.weight(1f)) {
+                        Text("Endereços")
+                    }
+                }
             }
-            items(produtos.categorias, span = { GridItemSpan(2) }) { category ->
-                Pill(text = category, modifier = Modifier.fillMaxWidth(), onClick = { onCategoryClick(category) })
-            }
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    text = "Products",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            items(products, key = { it.id }, span = { GridItemSpan(3) }) { product ->
-                ProductCard(product = product, onClick = { onProductClick(product.id) })
+
+            // Grade de 6 colunas: categorias ocupam 2 (3 por linha), produtos ocupam 3 (2 por linha).
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(6),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = listPadding(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(
+                        text = "Categorias",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                items(produtos.categorias, span = { GridItemSpan(2) }) { category ->
+                    Pill(text = category, modifier = Modifier.fillMaxWidth(), onClick = { onCategoryClick(category) })
+                }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(
+                        text = "Products",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                items(products, key = { it.id }, span = { GridItemSpan(3) }) { product ->
+                    ProductCard(product = product, onClick = { onProductClick(product.id) })
+                }
             }
         }
     }

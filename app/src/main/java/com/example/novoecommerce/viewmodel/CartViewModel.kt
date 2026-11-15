@@ -21,11 +21,12 @@ class CartViewModel : ViewModel() {
     val total: Double get() = _items.sumOf { it.product.price * it.quantity }
     val deliveryFee: Double get() = if (_items.isEmpty()) 0.0 else DELIVERY_FEE
 
-    // Dados da tela de pagamento
+    // Dados da tela de pagamento e entrega
     var cardNumber by mutableStateOf("1234123412341234")
     var customerName by mutableStateOf("Cliente")
     var street by mutableStateOf("Rua das Piaba")
     var cep by mutableStateOf("80000000")
+    var deliveryLocationText by mutableStateOf("")
 
     fun add(product: Product) {
         val index = _items.indexOfFirst { it.product.id == product.id }

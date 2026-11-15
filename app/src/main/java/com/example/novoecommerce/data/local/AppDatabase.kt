@@ -10,18 +10,26 @@ internal class AppDatabase private constructor(context: Context) : SQLiteOpenHel
     context.applicationContext,
     File(context.noBackupFilesDir, "aula_sqlite.db").absolutePath,
     null,
-    2
+    3
 ) {
     override fun onCreate(db: SQLiteDatabase) {
         criarTabelaUsuarios(db)
         criarTabelaProdutos(db)
+        criarTabelaCategorias(db)
+        criarTabelaEnderecos(db)
         inserirProdutosIniciais(db)
+        inserirCategoriasIniciais(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 2) {
             criarTabelaProdutos(db)
             inserirProdutosIniciais(db)
+        }
+        if (oldVersion < 3) {
+            criarTabelaCategorias(db)
+            criarTabelaEnderecos(db)
+            inserirCategoriasIniciais(db)
         }
     }
 
@@ -52,6 +60,47 @@ internal class AppDatabase private constructor(context: Context) : SQLiteOpenHel
             )
             """.trimIndent()
         )
+    }
+
+    private fun criarTabelaCategorias(db: SQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE categorias(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                descricao TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+
+    private fun criarTabelaEnderecos(db: SQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE enderecos(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                apelido TEXT NOT NULL,
+                cep TEXT NOT NULL,
+                rua TEXT NOT NULL,
+                bairro TEXT NOT NULL,
+                cidade TEXT NOT NULL,
+                estado TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+
+    private fun inserirCategoriasIniciais(db: SQLiteDatabase) {
+        ProductRepository.products
+            .map { it.category }
+            .distinct()
+            .sorted()
+            .forEach { categoria ->
+                db.execSQL(
+                    "INSERT OR IGNORE INTO categorias(nome, descricao) VALUES(?, ?)",
+                    arrayOf(categoria, "Produtos da categoria $categoria")
+                )
+            }
     }
 
     private fun inserirProdutosIniciais(db: SQLiteDatabase) {
