@@ -8,8 +8,6 @@ import androidx.lifecycle.ViewModel
 import com.example.novoecommerce.data.Usuario
 import com.example.novoecommerce.data.dal.UsuarioDAO
 import com.example.novoecommerce.validation.CadastroValidator
-import java.security.MessageDigest
-import java.security.SecureRandom
 
 class AuthViewModel : ViewModel() {
     var usuarioAtual by mutableStateOf<Usuario?>(null)
@@ -28,7 +26,7 @@ class AuthViewModel : ViewModel() {
     fun login(context: Context, email: String, senha: String): Boolean {
         val dao = UsuarioDAO(context)
         val salvo = dao.buscarSenha(email) ?: return false
-        if (!hashSenha(senha, salvo.salt).contentEquals(salvo.hash)) return false
+        if (!AuthManager.validarSenha(senha, salvo.salt, salvo.hash)) return false
         val id = dao.buscarIdPorEmail(email) ?: return false
         val usuario = dao.buscarPorId(id) ?: return false
         iniciarSessao(context, usuario)
@@ -37,8 +35,13 @@ class AuthViewModel : ViewModel() {
 
     fun cadastrar(context: Context, nome: String, email: String, senha: String) {
         CadastroValidator.validar(nome, email, senha)
-        val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }
-        UsuarioDAO(context).cadastrar(nome, email, hashSenha(senha, salt), salt)
+        val salt = AuthManager.criarSalt()
+        val senhaHash = AuthManager.gerarHash(senha, salt)
+        try {
+            UsuarioDAO(context).cadastrar(nome, email, senhaHash, salt)
+        } finally {
+            senhaHash.fill(0)
+        }
     }
 
     fun listarUsuarios(context: Context): List<Usuario> = UsuarioDAO(context).listar()
@@ -74,11 +77,6 @@ class AuthViewModel : ViewModel() {
             .apply()
         usuarioAtual = usuario
     }
-
-    private fun hashSenha(senha: String, salt: ByteArray): ByteArray =
-        MessageDigest.getInstance("SHA-256")
-            .apply { update(salt) }
-            .digest(senha.toByteArray(Charsets.UTF_8))
 
     companion object {
         private const val PREFERENCIAS = "sessao"

@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -123,14 +121,68 @@ fun PaymentScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            InfoCard(title = "Forma de pagamento", onEdit = { editCard = true }) {
-                Text("💳  ${cart.cardNumber.masked()}", fontWeight = FontWeight.Bold)
+            InfoCard(title = "Forma de pagamento", onEdit = { editCard = !editCard }) {
+                if (editCard) {
+                    var cardInput by remember(cart.cardNumber) { mutableStateOf(cart.cardNumber) }
+                    OutlinedTextField(
+                        value = cardInput,
+                        onValueChange = { cardInput = it },
+                        label = { Text("Número do cartão") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            cart.cardNumber = cardInput
+                            editCard = false
+                        }) { Text("Salvar") }
+                        TextButton(onClick = { editCard = false }) { Text("Cancelar") }
+                    }
+                } else {
+                    Text("💳  ${cart.cardNumber.masked()}", fontWeight = FontWeight.Bold)
+                }
             }
 
-            InfoCard(title = "Local de entrega", onEdit = { editAddress = true }) {
-                Text("Nome: ${cart.customerName}", fontWeight = FontWeight.Bold)
-                Text("Rua: ${cart.street}", fontWeight = FontWeight.Bold)
-                Text("Cep: ${cart.cep.masked(3)}", fontWeight = FontWeight.Bold)
+            InfoCard(title = "Local de entrega", onEdit = { editAddress = !editAddress }) {
+                if (editAddress) {
+                    var nameInput by remember(cart.customerName) { mutableStateOf(cart.customerName) }
+                    var streetInput by remember(cart.street) { mutableStateOf(cart.street) }
+                    var cepInput by remember(cart.cep) { mutableStateOf(cart.cep) }
+                    OutlinedTextField(
+                        value = nameInput,
+                        onValueChange = { nameInput = it },
+                        label = { Text("Nome") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = streetInput,
+                        onValueChange = { streetInput = it },
+                        label = { Text("Rua") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = cepInput,
+                        onValueChange = { cepInput = it },
+                        label = { Text("CEP") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            cart.customerName = nameInput
+                            cart.street = streetInput
+                            cart.cep = cepInput
+                            editAddress = false
+                        }) { Text("Salvar") }
+                        TextButton(onClick = { editAddress = false }) { Text("Cancelar") }
+                    }
+                } else {
+                    Text("Nome: ${cart.customerName}", fontWeight = FontWeight.Bold)
+                    Text("Rua: ${cart.street}", fontWeight = FontWeight.Bold)
+                    Text("Cep: ${cart.cep.masked(3)}", fontWeight = FontWeight.Bold)
+                }
                 if (cart.deliveryLocationText.isNotBlank()) {
                     Text(
                         text = "📍 ${cart.deliveryLocationText}",
@@ -163,34 +215,6 @@ fun PaymentScreen(
             }
         }
     }
-
-    if (editCard) {
-        EditDialog(
-            title = "Forma de pagamento",
-            labels = listOf("Número do cartão"),
-            initial = listOf(cart.cardNumber),
-            onDismiss = { editCard = false },
-            onSave = {
-                cart.cardNumber = it[0]
-                editCard = false
-            }
-        )
-    }
-
-    if (editAddress) {
-        EditDialog(
-            title = "Local de entrega",
-            labels = listOf("Nome", "Rua", "CEP"),
-            initial = listOf(cart.customerName, cart.street, cart.cep),
-            onDismiss = { editAddress = false },
-            onSave = {
-                cart.customerName = it[0]
-                cart.street = it[1]
-                cart.cep = it[2]
-                editAddress = false
-            }
-        )
-    }
 }
 
 @Composable
@@ -217,34 +241,4 @@ private fun InfoCard(
         }
         content()
     }
-}
-
-@Composable
-private fun EditDialog(
-    title: String,
-    labels: List<String>,
-    initial: List<String>,
-    onDismiss: () -> Unit,
-    onSave: (List<String>) -> Unit
-) {
-    val values = remember { mutableStateListOf<String>().apply { addAll(initial) } }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                labels.forEachIndexed { index, label ->
-                    OutlinedTextField(
-                        value = values[index],
-                        onValueChange = { values[index] = it },
-                        label = { Text(label) },
-                        singleLine = true
-                    )
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = { onSave(values.toList()) }) { Text("Salvar") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
-    )
 }

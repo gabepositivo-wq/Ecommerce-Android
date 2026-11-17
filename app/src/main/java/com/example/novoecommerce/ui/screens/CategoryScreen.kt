@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -91,15 +91,25 @@ fun CategoryScreen(
             }
         }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentPadding = listPadding(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(products, key = { it.id }) { product ->
-                ProductCard(product = product, onClick = { onProductClick(product.id) })
+            items(products.chunked(2)) { linha ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    linha.forEach { product ->
+                        Column(Modifier.weight(1f)) {
+                            ProductCard(product = product, onClick = { onProductClick(product.id) })
+                        }
+                    }
+                    if (linha.size == 1) {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

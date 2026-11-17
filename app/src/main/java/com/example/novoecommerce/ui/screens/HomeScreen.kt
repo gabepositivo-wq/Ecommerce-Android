@@ -2,14 +2,13 @@ package com.example.novoecommerce.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -102,17 +101,14 @@ fun HomeScreen(
                 }
             }
 
-            // Grade de 6 colunas: categorias ocupam 2 (3 por linha), produtos ocupam 3 (2 por linha).
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(6),
+            LazyColumn(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 contentPadding = listPadding(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
+                item {
                     Text(
                         text = "Categorias",
                         style = MaterialTheme.typography.titleMedium,
@@ -121,18 +117,44 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                items(produtos.categorias, span = { GridItemSpan(2) }) { category ->
-                    Pill(text = category, modifier = Modifier.fillMaxWidth(), onClick = { onCategoryClick(category) })
+                items(produtos.categorias.chunked(3)) { linha ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        linha.forEach { category ->
+                            Pill(
+                                text = category,
+                                modifier = Modifier.weight(1f),
+                                onClick = { onCategoryClick(category) }
+                            )
+                        }
+                        repeat(3 - linha.size) {
+                            Spacer(Modifier.weight(1f))
+                        }
+                    }
                 }
-                item(span = { GridItemSpan(maxLineSpan) }) {
+                item {
                     Text(
-                        text = "Products",
+                        text = "Produtos",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
-                items(products, key = { it.id }, span = { GridItemSpan(3) }) { product ->
-                    ProductCard(product = product, onClick = { onProductClick(product.id) })
+                items(products.chunked(2)) { linha ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        linha.forEach { product ->
+                            Column(Modifier.weight(1f)) {
+                                ProductCard(product = product, onClick = { onProductClick(product.id) })
+                            }
+                        }
+                        if (linha.size == 1) {
+                            Spacer(Modifier.weight(1f))
+                        }
+                    }
                 }
             }
         }

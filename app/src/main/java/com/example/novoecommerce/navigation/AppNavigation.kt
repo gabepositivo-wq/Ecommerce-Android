@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.novoecommerce.auth.AuthViewModel
+import com.example.novoecommerce.ui.screens.CadastroScreen
 import com.example.novoecommerce.ui.screens.CartScreen
 import com.example.novoecommerce.ui.screens.CategoriaCrudScreen
 import com.example.novoecommerce.ui.screens.CategoryScreen
@@ -27,6 +28,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data object LoginRoute
+
+@Serializable
+data object CadastroRoute
 
 @Serializable
 data object HomeRoute
@@ -84,7 +88,17 @@ fun NovoEcommerceApp(
                     nav.navigate(HomeRoute) {
                         popUpTo(LoginRoute) { inclusive = true }
                     }
+                },
+                onNavigateToCadastro = {
+                    nav.navigate(CadastroRoute)
                 }
+            )
+        }
+
+        composable<CadastroRoute> {
+            CadastroScreen(
+                auth = auth,
+                onBackToLogin = { nav.popBackStack() }
             )
         }
 
